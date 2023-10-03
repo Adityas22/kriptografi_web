@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cipher Caesar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cipher Caesar</h1>
+        <div class="switcher">
+            <label for="encryptionSwitch">Enkripsi</label>
+            <input type="radio" id="encryptionSwitch" name="mode" value="encryption" checked>
+            <label for="decryptionSwitch">Dekripsi</label>
+            <input type="radio" id="decryptionSwitch" name="mode" value="decryption">
+        </div>
+        <textarea id="inputText" placeholder="Masukkan teks..." rows="4"></textarea>
+        <label for="shiftAmount">Jumlah Pergeseran:</label>
+        <input type="number" id="shiftAmount" value="5">
+        <button id="executeButton">Eksekusi</button>
+        <h2>Hasil:</h2>
+        <div id="outputText"></div>
+    </div>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const inputText = document.getElementById("inputText");
+            const shiftAmount = document.getElementById("shiftAmount");
+            const executeButton = document.getElementById("executeButton");
+            const outputText = document.getElementById("outputText");
+            const encryptionSwitch = document.getElementById("encryptionSwitch");
+            const decryptionSwitch = document.getElementById("decryptionSwitch");
+
+            executeButton.addEventListener("click", function () {
+                const plainText = inputText.value;
+                const shift = parseInt(shiftAmount.value);
+                const mode = encryptionSwitch.checked ? "encryption" : "decryption";
+
+                if (mode === "encryption") {
+                    const encryptedText = caesarEncrypt(plainText, shift);
+                    outputText.textContent = encryptedText;
+                } else {
+                    const decryptedText = caesarDecrypt(plainText, shift);
+                    outputText.textContent = decryptedText;
+                }
+            });
+        });
+
+        function caesarEncrypt(plain, shift) {
+            let encrypt = "";
+            for (let i = 0; i < plain.length; i++) {
+                const char = plain[i];
+                if (char.match(/[a-zA-Z]/)) {
+                    let code = char.charCodeAt(0);
+                    code += (shift%26);
+                    console.log(code)
+                    if (char.match(/[a-z]/) && code > 122) {
+                        code -= 26;
+                    } else if (char.match(/[A-Z]/) && code > 90) {
+                        code -= 26;
+                    }
+                    const newChar = String.fromCharCode(code);
+                    encrypt += newChar;
+                } else {
+                    encrypt += char; 
+                }
+            }
+            return encrypt;
+        }
+
+        function caesarDecrypt(plain, shift) {
+            let decrypt = "";
+            for (let i = 0; i < plain.length; i++) {
+                const char = plain[i];
+                if (char.match(/[a-zA-Z]/)) {
+                    let code = char.charCodeAt(0);
+                    code -= (shift%26);
+                    console.log(code)
+                    if (char.match(/[a-z]/) && code < 97) {
+                        code += 26;
+                    } else if (char.match(/[A-Z]/) && code > 65) {
+                        code += 26;
+                    }
+                    const newChar = String.fromCharCode(code);
+                    decrypt += newChar;
+                } else {
+                    decrypt += char; 
+                }
+            }
+            return decrypt;
+        }
+    </script>
+</body>
+</html>

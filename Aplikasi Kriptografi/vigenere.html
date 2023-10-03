@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vigenere Cipher</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      label {
+        font-weight: bold;
+        display: block;
+        margin-top: 10px;
+      }
+
+      textarea,
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button {
+        background-color: #0074d9;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-right: 10px;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      h2 {
+        margin-top: 20px;
+        color: #333;
+      }
+
+      #outputText {
+        font-weight: bold;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Vigenere Cipher</h1>
+      <label for="inputText">Masukkan Teks:</label>
+      <textarea
+        id="inputText"
+        placeholder="Masukkan teks..."
+        rows="4"
+      ></textarea>
+      <label for="keyword">Kata Kunci:</label>
+      <input type="text" id="keyword" placeholder="Masukkan kata kunci..." />
+      <button id="encryptButton">Enkripsi</button>
+      <button id="decryptButton">Dekripsi</button>
+      <h2>Hasil:</h2>
+      <div id="outputText"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const inputText = document.getElementById("inputText");
+        const keyword = document.getElementById("keyword");
+        const encryptButton = document.getElementById("encryptButton");
+        const decryptButton = document.getElementById("decryptButton");
+        const outputText = document.getElementById("outputText");
+
+        encryptButton.addEventListener("click", function () {
+          const str = inputText.value;
+          const key = keyword.value.toUpperCase();
+
+          // Memeriksa apakah kunci hanya berisi huruf
+          if (/^[A-Z]+$/.test(key)) {
+            const generatedKey = generateKey(str, key);
+            const cipher_text = cipherText(str, generatedKey);
+            outputText.textContent = "Ciphertext: " + cipher_text;
+          } else {
+            alert("Kunci harus berupa huruf kapital (A-Z).");
+          }
+        });
+
+        decryptButton.addEventListener("click", function () {
+          const str = inputText.value;
+          const key = keyword.value.toUpperCase();
+
+          // Memeriksa apakah kunci hanya berisi huruf
+          if (/^[A-Z]+$/.test(key)) {
+            const generatedKey = generateKey(str, key);
+            const orig_text = decipherText(str, generatedKey);
+            outputText.textContent = "Original/Decrypted Text: " + orig_text;
+          } else {
+            alert("Kunci harus berupa huruf kapital (A-Z).");
+          }
+        });
+      });
+
+      function generateKey(str, key) {
+        str = str.split(" ").join("");
+        key = key.toUpperCase();
+        key = key.split(" ").join("");
+        newKey = key.split("");
+
+        if (str.length == key.length) return newKey.join("");
+        else {
+          let temp = key.length;
+          for (let i = 0; i < str.length - temp; i++) {
+            newKey.push(key[i % key.length]);
+          }
+        }
+        return newKey.join("");
+      }
+
+      function cipherText(str, key) {
+        let cipher_text = "";
+        for (let i = 0, j = 0; i < str.length; i++) {
+          const char = str[i];
+          if (char.match(/[a-zA-Z]/)) {
+            const shift =
+              key[j % key.length].toUpperCase().charCodeAt(0) -
+              "A".charCodeAt(0);
+            let code = char.charCodeAt(0);
+            code += shift;
+            if (char.match(/[a-z]/) && code > 122) {
+              code -= 26;
+            } else if (char.match(/[A-Z]/) && code > 90) {
+              code -= 26;
+            }
+            const newChar = String.fromCharCode(code);
+            cipher_text +=
+              char === char.toUpperCase() ? newChar : newChar.toLowerCase();
+            j++;
+          } else {
+            cipher_text += char;
+          }
+        }
+        return cipher_text;
+      }
+
+      function decipherText(cipherText, key) {
+        let plain_text = "";
+        for (let i = 0, j = 0; i < cipherText.length; i++) {
+          const char = cipherText[i];
+          if (char.match(/[a-zA-Z]/)) {
+            const shift =
+              key[j % key.length].toUpperCase().charCodeAt(0) -
+              "A".charCodeAt(0);
+            let code = char.charCodeAt(0);
+            code -= shift;
+            if (char.match(/[a-z]/) && code < 97) {
+              code += 26;
+            } else if (char.match(/[A-Z]/) && code < 65) {
+              code += 26;
+            }
+            const newChar = String.fromCharCode(code);
+            plain_text +=
+              char === char.toUpperCase() ? newChar : newChar.toLowerCase();
+            j++;
+          } else {
+            plain_text += char;
+          }
+        }
+        return plain_text;
+      }
+    </script>
+  </body>
+</html>

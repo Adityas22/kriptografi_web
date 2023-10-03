@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Super Enkripsi</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 600px; /* Atur lebar maksimum sesuai kebutuhan Anda */
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      textarea,
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      label {
+        display: block;
+        margin-top: 10px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      #outputText {
+        margin-top: 10px;
+        word-wrap: break-word; /* Agar teks yang panjang tidak melewati batas kontainer */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Super Enkripsi</h1>
+      <label for="inputText">Teks Input:</label>
+      <textarea
+        id="inputText"
+        placeholder="Masukkan teks yang akan dienkripsi atau didekripsi"
+      ></textarea>
+
+      <label for="shiftAmount">Kunci (Caesar Cipher):</label>
+      <input
+        type="number"
+        id="shiftAmount"
+        placeholder="Masukkan pergeseran (untuk Caesar Cipher)"
+      />
+
+      <label for="keyword">Kunci (Vigenere Cipher):</label>
+      <input
+        type="text"
+        id="keyword"
+        placeholder="Masukkan kata kunci (untuk Vigenere Cipher)"
+      />
+
+      <label for="rails">Jumlah Rel (Rail Fence Cipher):</label>
+      <input
+        type="number"
+        id="rails"
+        placeholder="Masukkan jumlah rel (untuk Rail Fence Cipher)"
+      />
+
+      <button id="encryptButton">Enkripsi</button>
+      <button id="decryptButton">Dekripsi</button>
+
+      <div id="outputText"></div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const inputText = document.getElementById("inputText");
+        const shiftAmount = document.getElementById("shiftAmount");
+        const keyword = document.getElementById("keyword");
+        const railsInput = document.getElementById("rails");
+        const encryptButton = document.getElementById("encryptButton");
+        const decryptButton = document.getElementById("decryptButton");
+        const outputText = document.getElementById("outputText");
+
+        encryptButton.addEventListener("click", function () {
+          const plainText = inputText.value;
+          const shift = parseInt(shiftAmount.value);
+          const vigenereKey = keyword.value.toUpperCase();
+          const rails = parseInt(railsInput.value);
+
+          const caesarEncrypted = caesarEncrypt(plainText, shift);
+          const vigenereKeyed = vigenereEncrypt(caesarEncrypted, vigenereKey);
+          const superEncrypted = encryptRailFence(vigenereKeyed, rails);
+
+          outputText.textContent = "Super Enkripsi: " + superEncrypted;
+        });
+
+        decryptButton.addEventListener("click", function () {
+          const superEncrypted = inputText.value;
+          const rails = parseInt(railsInput.value);
+          const vigenereKey = keyword.value.toUpperCase();
+
+          const railFenceDecrypted = decryptRailFence(superEncrypted, rails);
+          const vigenereDecrypted = vigenereDecrypt(
+            railFenceDecrypted,
+            vigenereKey
+          );
+          const caesarDecrypted = caesarDecrypt(
+            vigenereDecrypted,
+            shiftAmount.value
+          );
+
+          outputText.textContent = "Hasil Dekripsi: " + caesarDecrypted;
+        });
+      });
+
+      function caesarEncrypt(plain, shift) {
+        let encrypt = "";
+        for (let i = 0; i < plain.length; i++) {
+          const char = plain[i];
+          if (char.match(/[a-zA-Z]/)) {
+            let code = char.charCodeAt(0);
+            code += shift % 26;
+            console.log(code);
+            if (char.match(/[a-z]/) && code > 122) {
+              code -= 26;
+            } else if (char.match(/[A-Z]/) && code > 90) {
+              code -= 26;
+            }
+            const newChar = String.fromCharCode(code);
+            encrypt += newChar;
+          } else {
+            encrypt += char;
+          }
+        }
+        return encrypt;
+      }
+
+      function caesarDecrypt(plain, shift) {
+        let decrypt = "";
+        for (let i = 0; i < plain.length; i++) {
+          const char = plain[i];
+          if (char.match(/[a-zA-Z]/)) {
+            let code = char.charCodeAt(0);
+            code -= shift % 26;
+            console.log(code);
+            if (char.match(/[a-z]/) && code < 97) {
+              code += 26;
+            } else if (char.match(/[A-Z]/) && code > 65) {
+              code += 26;
+            }
+            const newChar = String.fromCharCode(code);
+            decrypt += newChar;
+          } else {
+            decrypt += char;
+          }
+        }
+        return decrypt;
+      }
+
+      function vigenereEncrypt(plain, key) {
+        let encrypted = "";
+        for (let i = 0, j = 0; i < plain.length; i++) {
+          const char = plain[i];
+          if (char.match(/[a-zA-Z]/)) {
+            const shift =
+              key[j % key.length].toUpperCase().charCodeAt(0) -
+              "A".charCodeAt(0);
+            let code = char.charCodeAt(0);
+            code += shift;
+            if (char.match(/[a-z]/) && code > 122) {
+              code -= 26;
+            } else if (char.match(/[A-Z]/) && code > 90) {
+              code -= 26;
+            }
+            const newChar = String.fromCharCode(code);
+            encrypted +=
+              char === char.toUpperCase() ? newChar : newChar.toLowerCase();
+            j++;
+          } else {
+            encrypted += char;
+          }
+        }
+        return encrypted;
+      }
+
+      function vigenereDecrypt(encrypted, key) {
+        let decrypted = "";
+        for (let i = 0, j = 0; i < encrypted.length; i++) {
+          const char = encrypted[i];
+          if (char.match(/[a-zA-Z]/)) {
+            const shift =
+              key[j % key.length].toUpperCase().charCodeAt(0) -
+              "A".charCodeAt(0);
+            let code = char.charCodeAt(0);
+            code -= shift;
+            if (char.match(/[a-z]/) && code < 97) {
+              code += 26;
+            } else if (char.match(/[A-Z]/) && code < 65) {
+              code += 26;
+            }
+            const newChar = String.fromCharCode(code);
+            decrypted +=
+              char === char.toUpperCase() ? newChar : newChar.toLowerCase();
+            j++;
+          } else {
+            decrypted += char;
+          }
+        }
+        return decrypted;
+      }
+
+      const encryptRailFence = (plaintext, rails) => {
+        if (rails < 2) {
+          return plaintext;
+        }
+
+        const fence = new Array(rails).fill(0).map(() => []);
+        let rail = 0;
+        let direction = 1;
+
+        for (let i = 0; i < plaintext.length; i++) {
+          const char = plaintext.charAt(i);
+
+          if (char === " ") {
+            continue;
+          }
+
+          fence[rail].push(char);
+
+          if (rail === 0) {
+            direction = 1;
+          } else if (rail === rails - 1) {
+            direction = -1;
+          }
+
+          rail += direction;
+        }
+
+        const ciphertext = fence.map((row) => row.join("")).join("");
+
+        return ciphertext;
+      };
+
+      const decryptRailFence = (ciphertext, rails) => {
+        ciphertext = ciphertext.replace(/\s/g, "");
+        if (rails < 2) {
+          return ciphertext;
+        }
+
+        const fence = new Array(rails).fill(0).map(() => []);
+        const railLengths = new Array(rails).fill(0);
+        let rail = 0;
+        let direction = 1;
+
+        for (let i = 0; i < ciphertext.length; i++) {
+          // Jika karakter adalah spasi, lanjutkan ke karakter berikutnya
+          if (ciphertext.charAt(i) === " ") {
+            continue;
+          }
+
+          railLengths[rail]++;
+
+          if (rail === 0) {
+            direction = 1;
+          } else if (rail === rails - 1) {
+            direction = -1;
+          }
+
+          rail += direction;
+        }
+
+        let currentIndex = 0;
+
+        for (let rail = 0; rail < rails; rail++) {
+          for (let j = 0; j < railLengths[rail]; j++) {
+            fence[rail].push(ciphertext.charAt(currentIndex));
+            currentIndex++;
+          }
+        }
+
+        let plaintext = "";
+        rail = 0;
+        direction = 1;
+
+        for (let i = 0; i < ciphertext.length; i++) {
+          const char = fence[rail].shift();
+
+          // Jika karakter adalah spasi, tambahkan spasi ke teks terdekripsi
+          if (char === " ") {
+            plaintext += " ";
+          } else {
+            plaintext += char;
+          }
+
+          if (rail === 0) {
+            direction = 1;
+          } else if (rail === rails - 1) {
+            direction = -1;
+          }
+
+          rail += direction;
+        }
+
+        return plaintext;
+      };
+    </script>
+  </body>
+</html>
